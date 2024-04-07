@@ -1,0 +1,105 @@
+# Created by charmm2lammps v1.8.1 on Thu Sep 25 15:49:42 IST 2014
+
+#Units defined here are real units: Lookup LAMMPS manual for description
+units           real
+neigh_modify    delay 2 every 1
+
+# Review these commands
+atom_style      full
+
+# Bond potential is defined by a harmonic potential
+bond_style      harmonic
+
+# Angle potentials are defined by the CHARMM force-field. 
+# Look-up for description
+angle_style     charmm
+
+# Non-bonded interactions are a mix of both LJ and long-range Coulombic
+pair_style      lj/charmm/coul/long 8 10
+pair_modify     mix arithmetic
+
+# Long-range electrostatic interactions are evaluated by a modified Ewald
+# summation technique, specifically, the particle-particle particle-mesh Ewald
+kspace_style    pppm 1e-4
+
+# Read Atom coordinate, Bond information, and Angle information data from the
+# data file
+read_data       solvate.data
+
+special_bonds   charmm
+
+# Specify initial velocities to all atoms sampled uniformly from a distribution 
+# corresponding to 298 K temperature 
+velocity        all create 298.0 12345678 dist uniform
+velocity	all zero linear
+
+#Define group of oxygen molecules
+group		oxy type 2
+
+# The H-O-H angle in water is constrained using the SHAKE algorithm
+fix             2 all shake 1e-6 500 0 m 1.0 a 1 b 1
+
+########################### BEGIN MODIFY HERE #################################
+### Use different intergration fixes to simulate various ensemble
+### MICROCANONICAL ENSEMBLE - fix nve
+### CANONICAL ENSEMBLE - fix nvt
+### You don't have to do anything after invoking fix nve for simulating
+### a microcanonical ensemble. However, for a canonical ensemble - 
+### fix nvt - you will have to look up the manual to understand the keywords 
+### that help you set the temperature and the coupling time constant.
+#==============================================================================
+
+# Set-up NVT simulations with a Nose-Hoover thermostat
+fix 		1 all nvt temp 298.0 298.0 100.0
+
+########################### END MODIFY HERE ##################################
+#==============================================================================
+
+variable prodtimes index 200000 500000 1000000 
+
+#Set initial equilibration timestep to 0.5 fs
+timestep        0.5
+
+# Generate position coordinates for the initial equilibration step
+dump            1 all yaml 100 equilibrate_${prodtimes}.dump id mol type xu yu zu 
+dump_modify     1 sort id
+
+# Run simulation for 2000*0.5 fs = 1 ps
+run             2000
+
+undump		1
+reset_timestep  0
+
+########################### BEGIN MODIFY HERE #################################
+### You may change the frequecy of the output
+# Generate position coordinates for the production run
+
+dump            1 all yaml 100 solvate_${prodtimes}.dump id mol type xu yu zu 
+dump_modify     1 sort id
+
+########################### END MODIFY HERE ##################################
+
+# Change timestep to 1 fs
+timestep        1
+
+#compute mean-square displacement
+compute		1 oxy msd com yes average yes
+fix             msd_calc all ave/time 100 1 100 c_1[4] file msd_${prodtimes}.txt
+
+#compute vacf
+compute		2 oxy vacf
+fix             vacf_calc all vector 1 c_2[4]
+variable        diff equal dt*trap(f_vacf_calc)
+
+# Output thermodynamic data
+thermo          100
+thermo_style	custom step temp pe ke etotal press v_diff
+thermo_modify	line yaml
+log thermo_nvt_${prodtimes}.file
+
+# Run the simulation for the requisite amount of time
+run 		${prodtimes}
+#=========================================================================
+clear
+    next prodtimes
+    jump solvate_nvt.in
