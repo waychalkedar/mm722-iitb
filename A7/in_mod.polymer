@@ -1,0 +1,92 @@
+variable	length index 20 30 40 50 100
+#-----------------------------------------------------------------------------------------------
+	# 3d polymer simulation
+	#-----------------------
+
+
+	# Initialization
+	#----------------
+	atom_style	full
+
+	#############################
+	## MODIFY THE VALUE OF a (number after the keyword loop) ##
+	## to change the ensemble size ##
+
+	variable	a loop 10
+	log		log.$a
+	#############################
+
+	#####################################
+	## MODIFY THE DATA FILE ##
+	# Atom definition
+	#-----------------
+	read_data	data.polymer.${length}
+	#####################################
+
+	group		polymer molecule 1
+
+	# Force fields
+	#--------------
+	bond_style	fene
+	bond_coeff	1 10.0 1.5 1.0 1.0
+
+	special_bonds	lj 0 1 1
+
+	#------------------------------------------------
+	# pair coefficients defining interactions between 
+	# 1-1 polymer-polymer
+	#------------------------------------------------
+	pair_style	lj/cut 1.0
+	pair_coeff	1 1 0.0 0.75 2.5
+
+	# Settings
+	#----------
+	neighbor	1.0 bin
+	neigh_modify	delay 10
+
+	timestep	0.001
+	run_style	verlet
+
+	velocity    	all create 1.00 2349992
+	velocity	all zero linear
+
+	reset_timestep	0
+
+	#Equilibrate chain
+	#------------------
+	#Fixes
+	#-----
+	fix		1 all nve
+	fix		2 all langevin 1.0 1.0 1.0 $a
+	##########################################################
+	## MODIFY THE "Radius of gyration" OUTPUT FILENAME ##
+	compute         1 polymer gyration
+	fix		3 polymer ave/time 1 1 1000 c_1 file Rg.out.${length}.$a
+	thermo_style	yaml
+	##########################################################
+	
+	thermo		10000
+	thermo_style	custom step temp epair emol ecoul elong etail pe ke etotal press
+	thermo_modify	line yaml
+	log thermo_${length}.$a.file
+
+	########################################################################
+	## MODIFY THE OUTPUT FILENAME ##
+	dump		eq all yaml 10000 dump.polymer.${length}.$a id type xu yu zu
+	dump_modify     eq sort id
+	########################################################################
+
+	#Run 1: Equilibrate chain in good solvent 
+	#----------------------------------------
+	run		300000
+
+	# Initialize next run
+	#---------------------
+	clear
+	next		a
+	jump		in_mod.polymer
+#---------------------------------------------------------------------------------------------
+next		length
+jump 		in_mod.polymer
+
+
