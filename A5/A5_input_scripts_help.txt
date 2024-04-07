@@ -1,0 +1,14 @@
+solvate.data:
+System's information. Crucial for any input script
+
+solvate_berend_200ps.in:
+NVE simulations with thermo- & barostats for 200 ps (20,000 timesteps) runtimes
+
+solvate_nve_stat.in:
+NVE simulations with thermo- & barostats for 500, 1000 ps runtimes
+
+solvate_nvt.in:
+NVT simulations for 200, 500, 1000 ps runtimes.
+
+solvate_nve.in:
+Unrestrained NVE simulations (i.e. without thermo- & barostats) for 200, 500, 1000 ps runtimes.
