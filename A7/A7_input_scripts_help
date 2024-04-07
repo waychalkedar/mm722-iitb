@@ -1,0 +1,5 @@
+in_mod.polymer:
+General input script for N = 20, 30, 40, 50, 100
+
+in_mod_50,100.polymer:
+Input script for N = 50, 100 with a longer simulation time.
