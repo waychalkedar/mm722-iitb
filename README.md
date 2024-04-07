@@ -1,6 +1,6 @@
 # Introduction
-This repository contains code mde to solve assignments as part of the MM 722: Molecular Simulations for Materials Engineering course at the Indian Institute of Technology Bombay.
-As of 06/04/24, this repository is being updated and is unfinished, since the semester is still ongoing.
+This repository contains code made to solve assignments as part of the MM 722: Molecular Simulations for Materials Engineering course at the Indian Institute of Technology Bombay.
+Not all assignments as part of the course have been included. As of 06/04/24, this repository is being updated and is unfinished, since the semester is still ongoing.
 
 # Structure
 There are separate folders for the respective assignment (e.g. A2 is Assignment 2). These contain:
