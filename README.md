@@ -1,7 +1,8 @@
 # Introduction
 This repository contains code made to solve a few assignments as part of the MM 722: Molecular Simulations for Materials Engineering course at the Indian Institute of Technology Bombay.
 Not all assignments as part of the course have been included - those assignments with the most coherent code were chosen. 
-As of 07/04/24, this repository is being updated and is unfinished, since the semester is still ongoing.
+This repository has been prepared by Kedar Waychal. As of 08/04/24, I am a Chemistry major at the Indian Institute of Technology Bombay.
+As of 08/04/24, this repository is being updated and is unfinished, since the semester is still ongoing.
 
 # Structure
 There are separate folders for the respective assignment (e.g. A2 is Assignment 2). These contain:
